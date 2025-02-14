@@ -2,6 +2,7 @@
 
 import aiomqtt
 from functools import reduce
+import platform
 import pygame
 from pygame import Color
 import pygame.freetype
@@ -17,7 +18,8 @@ SCALING_FACTOR = 9
 SCREEN_WIDTH = 128
 SCREEN_HEIGHT = 32
 
-my_inputs.get_key()
+if platform.system() != "Darwin":
+    my_inputs.get_key()
 
 pygame.init()
 hub75.init()
@@ -52,7 +54,7 @@ MATRIX = [
     "TRINITY",
 ]
 
-LOST = [ "4", "8", "15", "16", "23", "42"]
+LOST = [4, 8, 15, 16, 23, 42]
 
 SEVERANCE = [
     "MARK",
@@ -72,19 +74,22 @@ def load_text_file_to_array(filepath):
 
 palindromes = load_text_file_to_array("palindromes5.txt")
 
+def digits(p):
+    return [int(n) for n in re.findall(r"\d+", p)]
+
 def numbers_pow(p):
-    numbers = [int(n) for n in re.findall(r"\d+", p)]
+    numbers = digits(p)
     sum = reduce(lambda x, y: x + y, numbers, 0) if isinstance(numbers, list) else 0
     return (sum & (sum - 1)) == 0
 
 
 rules = [("ENTER A PASSWORD", lambda p: p),
+    ("A NUMBER FROM *LOST*", lambda p: set(digits(p)).intersection(set(LOST))),
     ("AT LEAST 5 CHARACTERS", lambda p: len(p) >= 5),
     ("MUST CONTAIN A NUMBER", lambda p: bool(re.search(r"\d", p))),
     ("NEEDS UPPERCASE LETTER", lambda p: any(c.isupper() for c in p)),
     ("INCLUDE A PALINDROME", lambda p: any(character in p.upper() for character in palindromes)),
     ("NEEDS A SPECIAL CHAR", lambda p: any(c in string.punctuation for c in p)),
-    ("A NUMBER FROM *LOST*", lambda p: any(character in p.upper() for character in LOST)),
     ("CHAR FROM *THE MATRIX*", lambda p: any(character in p.upper() for character in MATRIX)),
     ("INCLUDE A SEVERANCE INNIE", lambda p: any(character in p.upper() for character in SEVERANCE)),
     ("NUMBERS SUM TO A POW OF 2", numbers_pow),
@@ -96,10 +101,10 @@ while True:
     screen.fill((0, 0, 0))
     show_cursor = (pygame.time.get_ticks()*2 // 1000) % 2 == 0
     print_guess = guess + ("_" if show_cursor else " ")
-    first_y = 0 if guess else 10
-    # for some weird reason font.render skips the first empty space
-    font_guess.render_to(screen, (0, first_y), print_guess[:16], Color("green"), Color("black"))
-    font_guess.render_to(screen, (0, 10), print_guess[16:], Color("green"), Color("black"))
+    line_surf, r = font_guess.render(print_guess[:16], Color("green"), Color("black"))
+    screen.blit(line_surf, (0, 10-r[1]))
+    line_surf, r = font_guess.render(print_guess[16:], Color("green"), Color("black"))
+    screen.blit(line_surf, (0, 20-r[1]))
     font_small.render_to(screen, (0, 23), letters, Color("red"), Color("black"))
 
     for key in get_key():
