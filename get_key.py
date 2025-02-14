@@ -40,6 +40,16 @@ NAMES_TO_KEYS = {
 is_shifted = False
 def get_key():
     global is_shifted
+
+    def handle_shift(is_shifted, key):
+        if key.isalpha():
+            return key.upper() if is_shifted else key.lower()
+
+        if is_shifted and key in shifted.keys():
+            return shifted[key]
+
+        return key
+
     if platform.system() != "Darwin":
         events = my_inputs.get_key()
         if not events:
@@ -54,25 +64,16 @@ def get_key():
                     is_shifted = False if event.state == 0 else True
                 elif event.state:
                     if len(key) == 1:
-                        if key.isalpha():
-                            yield key.upper() if shifted else key
-                        elif is_shifted and key in shifted.keys():
-                    else:
-                        yield key
+                        yield handle_shift(is_shifted, key)
         return
 
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
+            is_shifted = 0 != pygame.key.get_mods() & (pygame.KMOD_LSHIFT | pygame.KMOD_RSHIFT)
             key = pygame.key.name(event.key)
             if len(key) == 1:
-                is_shifted = 0 != pygame.key.get_mods() & (pygame.KMOD_LSHIFT | pygame.KMOD_RSHIFT)
-                print(f"shifted: {is_shifted} K: {key} alpha: {key.isalpha()}")
-                if key.isalpha():
-                    yield key.upper() if is_shifted else key.lower()
-                elif is_shifted and key in shifted.keys():
-                    yield shifted[key]
-                else:
-                    yield key
+                # print(f"shifted: {is_shifted} K: {key} alpha: {key.isalpha()}")
+                yield handle_shift(is_shifted, key)
             else:
                 yield key
         elif event.type == pygame.QUIT:

@@ -83,7 +83,7 @@ rules = [("ENTER A PASSWORD", lambda p: p),
          ("NEEDS A SPECIAL CHAR", lambda p: any(c in string.punctuation for c in p)),
          ("A NUMBER FROM *LOST*", lambda p: any(character in p.upper() for character in LOST)),
          ("CHAR FROM *THE MATRIX*", lambda p: any(character in p.upper() for character in MATRIX)),
-         ("SEVERANCE INNIE", lambda p: any(character in p.upper() for character in SEVERANCE)),
+         ("INCLUDE A SEVERANCE INNIE", lambda p: any(character in p.upper() for character in SEVERANCE)),
          ("NUMBERS SUM TO A POW OF 2", numbers_pow),
          # ("HULZO'S FAVORITE COLOR",)
          ]
