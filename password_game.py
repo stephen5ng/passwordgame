@@ -103,9 +103,9 @@ while True:
     show_cursor = (pygame.time.get_ticks()*2 // 1000) % 2 == 0
     print_guess = guess + ("_" if show_cursor else " ")
     line_surf, r = font_guess.render(print_guess[:16], Color("green"), Color("black"))
-    screen.blit(line_surf, (0, 10-r[1]))
+    screen.blit(line_surf, (0, 9-r[1]))
     line_surf, r = font_guess.render(print_guess[16:], Color("green"), Color("black"))
-    screen.blit(line_surf, (0, 20-r[1]))
+    screen.blit(line_surf, (0, 21-r[1]))
     font_small.render_to(screen, (0, 23), letters, Color("red"), Color("black"))
 
     for key in get_key():
