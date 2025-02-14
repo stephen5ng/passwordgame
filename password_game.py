@@ -10,11 +10,14 @@ import string
 import sys
 
 from get_key import get_key
+import my_inputs
 import hub75
 
 SCALING_FACTOR = 9
 SCREEN_WIDTH = 128
 SCREEN_HEIGHT = 32
+
+my_inputs.get_key()
 
 pygame.init()
 hub75.init()

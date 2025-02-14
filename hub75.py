@@ -27,7 +27,6 @@ def create_rgbmatrix() -> Union["RGBMatrixEmulator.RGBMatrix", "rgbmatrix.RGBMat
     options.led_rgb_sequence = "RGB"
     options.multiplexing = 1
     options.panel_type = ""
-    options.pixel_mapper_config = "U-mapper"
     options.pwm_bits = 11
     options.pwm_lsb_nanoseconds = 130
     options.row_address_type = 0
@@ -40,10 +39,10 @@ def create_rgbmatrix() -> Union["RGBMatrixEmulator.RGBMatrix", "rgbmatrix.RGBMat
     else:
         options.rows = 32
         options.cols = 64
-        options.chain_length = 8
-        options.parallel = 3
+        options.chain_length = 2
+        options.parallel = 1
 
-    #sudo examples-api-use/demo -D0 --led-no-hardware-pulse --led-cols=64 --led-rows=32 --led-slowdown-gpio=5 --led-multiplexing=1 --led-pixel-mapper=U-mapper --led-chain 8 --led-parallel=3 
+    #sudo examples-api-use/demo -D0 --led-no-hardware-pulse --led-cols=64 --led-rows=32 --led-slowdown-gpio=5 --led-multiplexing=1 --led-pixel-mapper=U-mapper --led-chain 8 --led-parallel=3
 
     return RGBMatrix(options=options)
 
@@ -67,7 +66,7 @@ def update(screen: pygame.Surface) -> None:
 
     if platform.system() != "Darwin":
 # mypy: disable-error-code=attr-defined
-        img = img.rotate(270, Image.NEAREST, expand=1)
+        img = img.rotate(180, Image.NEAREST, expand=1)
 
     start = get_ticks()
     offscreen_canvas.SetImage(img)

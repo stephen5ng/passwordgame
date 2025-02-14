@@ -65,6 +65,8 @@ def get_key():
                 elif event.state:
                     if len(key) == 1:
                         yield handle_shift(is_shifted, key)
+                    else:
+                        yield key.lower()
         return
 
     for event in pygame.event.get():
