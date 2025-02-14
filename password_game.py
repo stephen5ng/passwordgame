@@ -38,23 +38,33 @@ shifted = {
 }
 
 MATRIX = [
-    "NEO",
-    "TRINITY",
-    "MORPHEUS",
-    "SMITH",
-    "ORACLE",
-    "CYPHER",
-    "TANK",
-    "DOZER",
     "APOC",
-    "SWITCH",
-    "MOUSE",
-    "RHINEHEART",
     "CHOI",
-    "DUFOUR"
+    "CYPHER",
+    "DOZER",
+    "DUFOUR",
+    "MORPHEUS",
+    "MOUSE",
+    "NEO",
+    "ORACLE",
+    "RHINEHEART",
+    "SMITH",
+    "SWITCH",
+    "TANK",
+    "TRINITY",
 ]
 
 LOST = [ "4", "8", "15", "16", "23", "42"]
+
+SEVERANCE = [
+   "MARK",
+   "HELLY",
+   "IRVING",
+   "PETEY",
+   "DYLAN",
+   "HUANG",
+   "CASEY",
+   ]
 
 def load_text_file_to_array(filepath):
      with open(filepath, 'r', encoding='utf-8') as file:  # Use utf-8 encoding for broader character support
@@ -77,10 +87,11 @@ rules = [("ENTER A PASSWORD", lambda p: p),
          ("AT LEAST 5 CHARACTERS", lambda p: len(p) >= 5),
          ("MUST CONTAIN A NUMBER", lambda p: bool(re.search(r"\d", p))),
          ("NEEDS UPPERCASE LETTER", lambda p: any(c.isupper() for c in p)),
+         ("INCLUDE A PALINDROME", lambda p: any(character in p.upper() for character in palindromes)),
          ("NEEDS A SPECIAL CHAR", lambda p: any(c in string.punctuation for c in p)),
          ("A NUMBER FROM *LOST*", lambda p: any(character in p.upper() for character in LOST)),
          ("CHAR FROM *THE MATRIX*", lambda p: any(character in p.upper() for character in MATRIX)),
-         ("INCLUDE A PALINDROME", lambda p: any(character in p.upper() for character in palindromes)),
+         ("SEVERANCE INNIE", lambda p: any(character in p.upper() for character in SEVERANCE)),
          ("NUMBERS SUM TO A POW OF 2", numbers_pow),
          # ("HULZO'S FAVORITE COLOR",)
          ]
