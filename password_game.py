@@ -55,69 +55,69 @@ MATRIX = [
 LOST = [ "4", "8", "15", "16", "23", "42"]
 
 SEVERANCE = [
-   "MARK",
-   "HELLY",
-   "IRVING",
-   "PETEY",
-   "DYLAN",
-   "HUANG",
-   "CASEY",
-   ]
+    "MARK",
+    "HELLY",
+    "IRVING",
+    "PETEY",
+    "DYLAN",
+    "HUANG",
+    "CASEY",
+    ]
 
 def load_text_file_to_array(filepath):
-     with open(filepath, 'r', encoding='utf-8') as file:  # Use utf-8 encoding for broader character support
-         lines = file.readlines()  # Read all lines into a list
-         lines = [line.strip().upper() for line in lines]
-         return lines
+    with open(filepath, 'r', encoding='utf-8') as file:  # Use utf-8 encoding for broader character support
+        lines = file.readlines()  # Read all lines into a list
+        lines = [line.strip().upper() for line in lines]
+    return lines
 
 palindromes = load_text_file_to_array("palindromes5.txt")
 
 def numbers_pow(p):
-   numbers = [int(n) for n in re.findall(r"\d+", p)]
-   sum = reduce(lambda x, y: x + y, numbers, 0) if isinstance(numbers, list) else 0
-   return (sum & (sum - 1)) == 0
+    numbers = [int(n) for n in re.findall(r"\d+", p)]
+    sum = reduce(lambda x, y: x + y, numbers, 0) if isinstance(numbers, list) else 0
+    return (sum & (sum - 1)) == 0
 
 
 rules = [("ENTER A PASSWORD", lambda p: p),
-         ("AT LEAST 5 CHARACTERS", lambda p: len(p) >= 5),
-         ("MUST CONTAIN A NUMBER", lambda p: bool(re.search(r"\d", p))),
-         ("NEEDS UPPERCASE LETTER", lambda p: any(c.isupper() for c in p)),
-         ("INCLUDE A PALINDROME", lambda p: any(character in p.upper() for character in palindromes)),
-         ("NEEDS A SPECIAL CHAR", lambda p: any(c in string.punctuation for c in p)),
-         ("A NUMBER FROM *LOST*", lambda p: any(character in p.upper() for character in LOST)),
-         ("CHAR FROM *THE MATRIX*", lambda p: any(character in p.upper() for character in MATRIX)),
-         ("INCLUDE A SEVERANCE INNIE", lambda p: any(character in p.upper() for character in SEVERANCE)),
-         ("NUMBERS SUM TO A POW OF 2", numbers_pow),
-         # ("HULZO'S FAVORITE COLOR",)
-         ]
+    ("AT LEAST 5 CHARACTERS", lambda p: len(p) >= 5),
+    ("MUST CONTAIN A NUMBER", lambda p: bool(re.search(r"\d", p))),
+    ("NEEDS UPPERCASE LETTER", lambda p: any(c.isupper() for c in p)),
+    ("INCLUDE A PALINDROME", lambda p: any(character in p.upper() for character in palindromes)),
+    ("NEEDS A SPECIAL CHAR", lambda p: any(c in string.punctuation for c in p)),
+    ("A NUMBER FROM *LOST*", lambda p: any(character in p.upper() for character in LOST)),
+    ("CHAR FROM *THE MATRIX*", lambda p: any(character in p.upper() for character in MATRIX)),
+    ("INCLUDE A SEVERANCE INNIE", lambda p: any(character in p.upper() for character in SEVERANCE)),
+    ("NUMBERS SUM TO A POW OF 2", numbers_pow),
+    # ("HULZO'S FAVORITE COLOR",)
+    ]
 letters = rules[0][0]
 
 while True:
-   screen.fill((0, 0, 0))
-   show_cursor = (pygame.time.get_ticks()*2 // 1000) % 2 == 0
-   print_guess = guess + ("_" if show_cursor else " ")
-   first_y = 0 if guess else 10
-   # for some weird reason font.render skips the first empty space
-   font_guess.render_to(screen, (0, first_y), print_guess[:16], Color("green"), Color("black"))
-   font_guess.render_to(screen, (0, 10), print_guess[16:], Color("green"), Color("black"))
-   font_small.render_to(screen, (0, 23), letters, Color("red"), Color("black"))
+    screen.fill((0, 0, 0))
+    show_cursor = (pygame.time.get_ticks()*2 // 1000) % 2 == 0
+    print_guess = guess + ("_" if show_cursor else " ")
+    first_y = 0 if guess else 10
+    # for some weird reason font.render skips the first empty space
+    font_guess.render_to(screen, (0, first_y), print_guess[:16], Color("green"), Color("black"))
+    font_guess.render_to(screen, (0, 10), print_guess[16:], Color("green"), Color("black"))
+    font_small.render_to(screen, (0, 23), letters, Color("red"), Color("black"))
 
-   for key in get_key():
-      if key == "escape":
-         guess = ""
-      elif key == "backspace":
-         guess = guess[:-1]
-      if len(key) == 1:
-         guess += key
+    for key in get_key():
+        if key == "escape":
+            guess = ""
+        elif key == "backspace":
+            guess = guess[:-1]
+        elif len(key) == 1:
+            guess += key
 
-      for rule in rules:
-         if not rule[1](guess):
+    for rule in rules:
+        if not rule[1](guess):
             letters = rule[0]
             break
-      else:
-         letters = "THANK YOU"
+        else:
+            letters = "THANK YOU"
 
-   hub75.update(screen)
-   pygame.transform.scale(screen,
-   display_surface.get_rect().size, dest_surface=display_surface)
-   pygame.display.update()
+    hub75.update(screen)
+    pygame.transform.scale(screen,
+    display_surface.get_rect().size, dest_surface=display_surface)
+    pygame.display.update()
