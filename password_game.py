@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import aiomqtt
+from functools import reduce
 import pygame
 from pygame import Color
 import pygame.freetype
@@ -36,42 +37,52 @@ shifted = {
    "=": "+"
 }
 
-BUGS_LIFE = [
-    "FLIK",
-    "ATTA",
-    "DOT",
-    "QUEEN",
-    "THORNY",
-    "CORNELIUS",
-    "SOIL",
-    "FLORA",
-    "APHIE",
-    "HOPPER",
-    "MOLT",
-    "THUMPER",
-    "AXLE",
-    "LOCO",
-    "HEIMLICH",
-    "FRANCIS",
-    "DIM",
-    "SLIM",
-    "ROSIE",
-    "MANNY",
-    "GYPSY",
-    "FLEA",
-    "TUCK",
-    "ROLL",
-    "HARRY",
-    "THUD",
-    "GRUB"
+MATRIX = [
+    "NEO",
+    "TRINITY",
+    "MORPHEUS",
+    "SMITH",
+    "ORACLE",
+    "CYPHER",
+    "TANK",
+    "DOZER",
+    "APOC",
+    "SWITCH",
+    "MOUSE",
+    "RHINEHEART",
+    "CHOI",
+    "DUFOUR"
 ]
+
+LOST = [ "4", "8", "15", "16", "23", "42"]
+
+def load_text_file_to_array(filepath):
+     with open(filepath, 'r', encoding='utf-8') as file:  # Use utf-8 encoding for broader character support
+         lines = file.readlines()  # Read all lines into a list
+         lines = [line.strip().upper() for line in lines]
+         return lines
+
+palindromes = load_text_file_to_array("palindromes5.txt")
+
+def numbers_pow(p):
+   numbers = [int(n) for n in re.findall(r"\d+", p)]
+   print(f"numbers: {numbers}")
+   sum = reduce(lambda x, y: x + y, numbers, 0) if isinstance(numbers, list) else 0
+   print(f"sum: {sum}")
+   return (sum & (sum - 1)) == 0
+   # return True
+
 
 rules = [("ENTER A PASSWORD", lambda p: p),
          ("AT LEAST 5 CHARACTERS", lambda p: len(p) >= 5),
          ("MUST CONTAIN A NUMBER", lambda p: bool(re.search(r"\d", p))),
          ("NEEDS UPPERCASE LETTER", lambda p: any(c.isupper() for c in p)),
          ("NEEDS A SPECIAL CHAR", lambda p: any(c in string.punctuation for c in p)),
-         ("CHARACTER FROM BUG'S LIFE", lambda p: any(character in p.upper() for character in BUGS_LIFE))
+         ("A NUMBER FROM *LOST*", lambda p: any(character in p.upper() for character in LOST)),
+         ("CHAR FROM *THE MATRIX*", lambda p: any(character in p.upper() for character in MATRIX)),
+         ("INCLUDE A PALINDROME", lambda p: any(character in p.upper() for character in palindromes)),
+         ("NUMBERS SUM TO A POW OF 2", numbers_pow),
+         # ("HULZO'S FAVORITE COLOR",)
          ]
 letters = rules[0][0]
 
@@ -99,16 +110,16 @@ while True:
             unicode_char = event.unicode  # Use event.unicode for characters
             guess += unicode_char
 
+         for rule in rules:
+            if not rule[1](guess):
+               letters = rule[0]
+               break
+         else:
+            letters = "THANK YOU"
       if event.type == pygame.QUIT:
          pygame.quit()
          sys.exit(0)
 
-   for rule in rules:
-      if not rule[1](guess):
-         letters = rule[0]
-         break
-   else:
-      letters = "THANK YOU"
    hub75.update(screen)
    pygame.transform.scale(screen,
    display_surface.get_rect().size, dest_surface=display_surface)
