@@ -84,14 +84,15 @@ def numbers_pow(p):
 
 
 rules = [("ENTER A PASSWORD", lambda p: p),
-    ("A NUMBER FROM *LOST*", lambda p: set(digits(p)).intersection(set(LOST))),
-    ("AT LEAST 5 CHARACTERS", lambda p: len(p) >= 5),
     ("MUST CONTAIN A NUMBER", lambda p: bool(re.search(r"\d", p))),
-    ("NEEDS UPPERCASE LETTER", lambda p: any(c.isupper() for c in p)),
-    ("INCLUDE A PALINDROME", lambda p: any(character in p.upper() for character in palindromes)),
-    ("NEEDS A SPECIAL CHAR", lambda p: any(c in string.punctuation for c in p)),
+    ("AND AN UPPERCASE LETTER", lambda p: any(c.isupper() for c in p)),
+    ("ALSO A SPECIAL CHAR", lambda p: any(c in string.punctuation for c in p)),
+    ("AT LEAST 5 CHARACTERS", lambda p: len(p) >= 5),
     ("CHAR FROM *THE MATRIX*", lambda p: any(character in p.upper() for character in MATRIX)),
-    ("INCLUDE A SEVERANCE INNIE", lambda p: any(character in p.upper() for character in SEVERANCE)),
+    ("INCLUDE A PALINDROME", lambda p: any(character in p.upper() for character in palindromes)),
+    ("A NUMBER FROM *LOST*", lambda p: set(digits(p)).intersection(set(LOST))),
+    ("NAME A SEVERANCE INNIE", lambda p: any(character in p.upper() for character in SEVERANCE)),
+    ("AN ODD NUMBER OF VOWELS", lambda p: sum(1 for c in p.lower() if c in "aeiou") % 2 == 1),
     ("NUMBERS SUM TO A POW OF 2", numbers_pow),
     # ("HULZO'S FAVORITE COLOR",)
     ]
