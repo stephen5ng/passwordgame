@@ -8,6 +8,8 @@ import pygame.freetype
 import re
 import string
 import sys
+
+from get_key import get_key
 import hub75
 
 SCALING_FACTOR = 9
@@ -29,13 +31,6 @@ font_small = pygame.freetype.Font("scientifica-11.bdf", 11)
 guess = ""
 
 screen = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
-
-shifted = {
-   "1": "!",
-   "/": "?",
-   "-": "_",
-   "=": "+"
-}
 
 MATRIX = [
     "APOC",
@@ -76,11 +71,8 @@ palindromes = load_text_file_to_array("palindromes5.txt")
 
 def numbers_pow(p):
    numbers = [int(n) for n in re.findall(r"\d+", p)]
-   print(f"numbers: {numbers}")
    sum = reduce(lambda x, y: x + y, numbers, 0) if isinstance(numbers, list) else 0
-   print(f"sum: {sum}")
    return (sum & (sum - 1)) == 0
-   # return True
 
 
 rules = [("ENTER A PASSWORD", lambda p: p),
@@ -107,29 +99,20 @@ while True:
    font_guess.render_to(screen, (0, 10), print_guess[16:], Color("green"), Color("black"))
    font_small.render_to(screen, (0, 23), letters, Color("red"), Color("black"))
 
-   for event in pygame.event.get():
-      if event.type == pygame.KEYDOWN:
-         key = pygame.key.name(event.key).upper()
-         print(f"{key}")
-         if event.key == pygame.K_ESCAPE:
-            guess = ""
-         elif event.key == pygame.K_BACKSPACE:
-            guess = guess[:-1]
-         elif event.key == pygame.K_SPACE:
-            guess += ' '
-         elif event.unicode:  # Check if it's a valid unicode character
-            unicode_char = event.unicode  # Use event.unicode for characters
-            guess += unicode_char
+   for key in get_key():
+      if key == "escape":
+         guess = ""
+      elif key == "backspace":
+         guess = guess[:-1]
+      if len(key) == 1:
+         guess += key
 
-         for rule in rules:
-            if not rule[1](guess):
-               letters = rule[0]
-               break
-         else:
-            letters = "THANK YOU"
-      if event.type == pygame.QUIT:
-         pygame.quit()
-         sys.exit(0)
+      for rule in rules:
+         if not rule[1](guess):
+            letters = rule[0]
+            break
+      else:
+         letters = "THANK YOU"
 
    hub75.update(screen)
    pygame.transform.scale(screen,
