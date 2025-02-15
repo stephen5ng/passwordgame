@@ -34,7 +34,8 @@ NAMES_TO_KEYS = {
     "APOSTROPHE": "'",
     "COMMA": ",",
     "DOT": ".",
-    "SLASH": "/"
+    "SLASH": "/",
+    "ESC": "escape"
 }
 
 is_shifted = False
@@ -79,5 +80,4 @@ def get_key():
             else:
                 yield key
         elif event.type == pygame.QUIT:
-             pygame.quit()
-             sys.exit(0)
+            yield "quit"

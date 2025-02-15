@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 import aiomqtt
+import asyncio
 from functools import reduce
+import os
 import platform
 import pygame
 from pygame import Color
@@ -9,7 +11,9 @@ import pygame.freetype
 import re
 import string
 import sys
+from typing import Callable
 
+from pygameasync import Clock
 from get_key import get_key
 import my_inputs
 import hub75
@@ -18,24 +22,7 @@ SCALING_FACTOR = 9
 SCREEN_WIDTH = 128
 SCREEN_HEIGHT = 32
 
-if platform.system() != "Darwin":
-    my_inputs.get_key()
-
-pygame.init()
-hub75.init()
-
-pygame.freetype.init()
-
-display_surface = pygame.display.set_mode(
-   (SCREEN_WIDTH*SCALING_FACTOR, SCREEN_HEIGHT*SCALING_FACTOR))
-
-pygame.display.set_caption('Circus Circus')
-
-font_guess = pygame.freetype.Font("raize-13.pcf", 13)
-font_small = pygame.freetype.Font("scientifica-11.bdf", 11)
-guess = ""
-
-screen = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+MQTT_SERVER = os.environ.get("MQTT_SERVER", "localhost")
 
 MATRIX = [
     "APOC",
@@ -96,34 +83,81 @@ rules = [("ENTER A PASSWORD", lambda p: p),
     ("NUMBERS SUM TO A POW OF 2", numbers_pow),
     # ("HULZO'S FAVORITE COLOR",)
     ]
-letters = rules[0][0]
 
-while True:
-    screen.fill((0, 0, 0))
-    show_cursor = (pygame.time.get_ticks()*2 // 1000) % 2 == 0
-    print_guess = guess + ("_" if show_cursor else " ")
-    line_surf, r = font_guess.render(print_guess[:16], Color("green"), Color("black"))
-    screen.blit(line_surf, (0, 9-r[1]))
-    line_surf, r = font_guess.render(print_guess[16:], Color("green"), Color("black"))
-    screen.blit(line_surf, (0, 21-r[1]))
-    font_small.render_to(screen, (0, 23), letters, Color("red"), Color("black"))
+quit_app = False
 
-    for key in get_key():
-        if key == "escape":
-            guess = ""
-        elif key == "backspace":
-            guess = guess[:-1]
-        elif len(key) == 1:
-            guess += key
+async def trigger_events_from_mqtt(subscribe_client: aiomqtt.Client):
+    global quit_app
+    async for message in subscribe_client.messages:
+        if message.topic.matches("password_game/quit"):
+            quit_app = True
 
-    for rule in rules:
-        if not rule[1](guess):
-            letters = rule[0]
-            break
-        else:
-            letters = "THANK YOU"
+async def run_game():
+    global quit_app
 
-    hub75.update(screen)
-    pygame.transform.scale(screen,
-    display_surface.get_rect().size, dest_surface=display_surface)
-    pygame.display.update()
+    clock = Clock()
+    pygame.freetype.init()
+    display_surface = pygame.display.set_mode(
+       (SCREEN_WIDTH*SCALING_FACTOR, SCREEN_HEIGHT*SCALING_FACTOR))
+
+    pygame.display.set_caption('Circus Circus')
+
+    font_guess = pygame.freetype.Font("raize-13.pcf", 13)
+    font_small = pygame.freetype.Font("scientifica-11.bdf", 11)
+    screen = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+    letters = rules[0][0]
+    guess = ""
+    while True:
+        if quit_app:
+            return
+        screen.fill((0, 0, 0))
+        show_cursor = (pygame.time.get_ticks()*2 // 1000) % 2 == 0
+        print_guess = guess + ("_" if show_cursor else " ")
+        line_surf, r = font_guess.render(print_guess[:16], Color("green"), Color("black"))
+        screen.blit(line_surf, (0, 9-r[1]))
+        line_surf, r = font_guess.render(print_guess[16:], Color("green"), Color("black"))
+        screen.blit(line_surf, (0, 21-r[1]))
+        font_small.render_to(screen, (0, 23), letters, Color("red"), Color("black"))
+
+        for key in get_key():
+            if key == "quit":
+                return
+            if key == "escape":
+                guess = ""
+            elif key == "backspace":
+                guess = guess[:-1]
+            elif len(key) == 1:
+                guess += key
+
+        for rule in rules:
+            if not rule[1](guess):
+                letters = rule[0]
+                break
+            else:
+                letters = "THANK YOU"
+
+        hub75.update(screen)
+        pygame.transform.scale(screen,
+        display_surface.get_rect().size, dest_surface=display_surface)
+        pygame.display.update()
+        await clock.tick(30)
+
+async def main():
+    if platform.system() != "Darwin":
+        my_inputs.get_key()
+
+    async with aiomqtt.Client(MQTT_SERVER) as subscribe_client:
+        await subscribe_client.subscribe("#")
+        subscribe_task = asyncio.create_task(
+            trigger_events_from_mqtt(subscribe_client),
+            name="mqtt subscribe handler")
+
+        await run_game()
+        subscribe_task.cancel()
+        pygame.quit()
+
+if __name__ == "__main__":
+    hub75.init()
+    pygame.init()
+
+    asyncio.run(main())
