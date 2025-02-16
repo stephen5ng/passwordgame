@@ -74,6 +74,8 @@ def get_key():
         if event.type == pygame.KEYDOWN:
             is_shifted = 0 != pygame.key.get_mods() & (pygame.KMOD_LSHIFT | pygame.KMOD_RSHIFT)
             key = pygame.key.name(event.key)
+            if key.upper() in NAMES_TO_KEYS.keys():
+                key = NAMES_TO_KEYS[key.upper()]
             if len(key) == 1:
                 # print(f"shifted: {is_shifted} K: {key} alpha: {key.isalpha()}")
                 yield handle_shift(is_shifted, key)

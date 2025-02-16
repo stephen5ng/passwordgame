@@ -69,11 +69,79 @@ def numbers_pow(p):
     sum = reduce(lambda x, y: x + y, numbers, 0) if isinstance(numbers, list) else 0
     return (sum & (sum - 1)) == 0
 
+def is_prime(n):
+    """Check if a number is prime."""
+    if n < 2:
+        return False
+    if n in (2, 3):
+        return True
+    if n % 2 == 0 or n % 3 == 0:
+        return False
+
+    i = 5
+    while i * i <= n:
+        if n % i == 0 or n % (i + 2) == 0:
+            return False
+        i += 6  # Skip even numbers and multiples of 3
+
+    return True
+
+def extract_roman_numerals(text):
+    # Define a regex pattern for valid Roman numerals
+    pattern = r'(M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3}))'
+
+    # Use re.finditer to extract matches
+    matches = re.finditer(pattern, text)
+
+    # Extract full Roman numerals
+    roman_numerals = []
+    last_end = -1
+
+    for match in matches:
+        numeral = match.group(1)
+        start = match.start()
+
+        # Ensure numerals are not overlapping (prevent partial matches)
+        if start > last_end:
+            roman_numerals.append(numeral)
+            last_end = match.end()
+
+    return [r for r in roman_numerals if r]
+
+def roman_to_int(s):
+    roman_values = {
+        'I': 1, 'V': 5, 'X': 10, 'L': 50,
+        'C': 100, 'D': 500, 'M': 1000
+    }
+
+    total = 0
+    prev_value = 0
+
+    for char in reversed(s):  # Process from right to left
+        value = roman_values[char]
+
+        if value < prev_value:
+            total -= value  # Subtractive notation (e.g., IV = 4)
+        else:
+            total += value
+
+        prev_value = value  # Update previous value
+
+    return total
+
+def romans_prime(p):
+    romans = extract_roman_numerals(p)
+    numbers = [roman_to_int(r) for r in romans]
+    s = sum(numbers)
+    ip = is_prime(s)
+    # print(f"romans:{romans} number:{numbers} sum:{s} is_prime:{ip}")
+    return ip
 
 rules = [("ENTER A PASSWORD", lambda p: p),
     ("MUST CONTAIN A NUMBER", lambda p: bool(re.search(r"\d", p))),
     ("AND AN UPPERCASE LETTER", lambda p: any(c.isupper() for c in p)),
     ("ALSO A SPECIAL CHAR", lambda p: any(c in string.punctuation for c in p)),
+    ("AND A ROMAN NUMERAL", lambda p: extract_roman_numerals(p)),
     ("AT LEAST 5 CHARACTERS", lambda p: len(p) >= 5),
     ("CHAR FROM *THE MATRIX*", lambda p: any(character in p.upper() for character in MATRIX)),
     ("INCLUDE A PALINDROME", lambda p: any(character in p.upper() for character in palindromes)),
@@ -81,7 +149,7 @@ rules = [("ENTER A PASSWORD", lambda p: p),
     ("NAME A SEVERANCE INNIE", lambda p: any(character in p.upper() for character in SEVERANCE)),
     ("AN ODD NUMBER OF VOWELS", lambda p: sum(1 for c in p.lower() if c in "aeiou") % 2 == 1),
     ("NUMBERS SUM TO A POW OF 2", numbers_pow),
-    # ("HULZO'S FAVORITE COLOR",)
+    ("ROMAN #'S SUM TO A PRIME", romans_prime),
     ]
 
 quit_app = False
@@ -143,9 +211,6 @@ async def run_game():
         await clock.tick(30)
 
 async def main():
-    if platform.system() != "Darwin":
-        my_inputs.get_key()
-
     async with aiomqtt.Client(MQTT_SERVER) as subscribe_client:
         await subscribe_client.subscribe("#")
         subscribe_task = asyncio.create_task(
@@ -157,6 +222,9 @@ async def main():
         pygame.quit()
 
 if __name__ == "__main__":
+    if platform.system() != "Darwin":
+        my_inputs.get_key()
+
     hub75.init()
     pygame.init()
 
