@@ -175,16 +175,30 @@ async def run_game():
     screen = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
     letters = rules[0][0]
     guess = ""
+    cursor_pos = 0  # Add cursor position tracking
+    
     while True:
         if quit_app:
             return
         screen.fill((0, 0, 0))
         show_cursor = (pygame.time.get_ticks()*2 // 1000) % 2 == 0
-        print_guess = guess + ("_" if show_cursor else " ")
-        line_surf, r = font_guess.render(print_guess[:16], Color("green"), Color("black"))
-        screen.blit(line_surf, (r[0], 9-r[1]))
-        line_surf, r = font_guess.render(print_guess[16:], Color("green"), Color("black"))
-        screen.blit(line_surf, (r[0], 21-r[1]))
+
+        # Draw the guess text without cursor
+        line_surf, r = font_guess.render(guess[:16], Color("green"), Color("black"))
+        screen.blit(line_surf, (0, 9-r[1]))
+        line_surf, r = font_guess.render(guess[16:], Color("green"), Color("black"))
+        screen.blit(line_surf, (0, 21-r[1]))
+
+        # Draw cursor line if it should be shown
+        if show_cursor:
+            cursor_y = 21-r[1] if cursor_pos >= 16 else 9-r[1]
+            # Calculate x position based on character width (assuming monospace font)
+            char_width = 8  # Adjust this value based on your font
+            cursor_x = (cursor_pos % 16) * char_width
+            pygame.draw.line(screen, Color("green"), 
+                (cursor_x, cursor_y), 
+                (cursor_x, cursor_y + 13))  # Adjust line height as needed
+
         font_small.render_to(screen, (0, 23), letters, Color("red"), Color("black"))
 
         for key in get_key():
@@ -192,10 +206,18 @@ async def run_game():
                 return
             if key == "escape":
                 guess = ""
+                cursor_pos = 0
             elif key == "backspace":
-                guess = guess[:-1]
+                if cursor_pos > 0:
+                    guess = guess[:cursor_pos-1] + guess[cursor_pos:]
+                    cursor_pos -= 1
+            elif key == "left":
+                cursor_pos = max(0, cursor_pos - 1)
+            elif key == "right":
+                cursor_pos = min(len(guess), cursor_pos + 1)
             elif len(key) == 1:
-                guess += key
+                guess = guess[:cursor_pos] + key + guess[cursor_pos:]
+                cursor_pos += 1
 
         for rule in rules:
             if not rule[1](guess):
@@ -217,9 +239,9 @@ async def main():
             trigger_events_from_mqtt(subscribe_client),
             name="mqtt subscribe handler")
 
-        await run_game()
-        subscribe_task.cancel()
-        pygame.quit()
+    await run_game()
+    subscribe_task.cancel()
+    pygame.quit()
 
 if __name__ == "__main__":
     if platform.system() != "Darwin":
