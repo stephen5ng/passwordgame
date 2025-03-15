@@ -2,3 +2,4 @@ aiomqtt
 pillow
 pygame-ce
 RGBMatrixEmulator
+typing_extensions
