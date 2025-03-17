@@ -21,8 +21,16 @@ import hub75
 SCALING_FACTOR = 9
 SCREEN_WIDTH = 128
 SCREEN_HEIGHT = 32
+GUESS_FONT_SIZE = 13
+GUESS_FONT_HEIGHT = 9
 
 MQTT_SERVER = os.environ.get("MQTT_SERVER", "localhost")
+
+CURSOR_OFFSET = 1
+LINE_SPACING = 2
+GUESS_FIRST_LINE_Y = GUESS_FONT_HEIGHT
+GUESS_SECOND_LINE_Y = 2 * GUESS_FONT_HEIGHT + LINE_SPACING
+MESSAGE_THIRD_LINE_Y = 24
 
 MATRIX = [
     "APOC",
@@ -170,12 +178,22 @@ async def run_game():
 
     pygame.display.set_caption('Circus Circus')
 
-    font_guess = pygame.freetype.Font("raize-13.pcf", 13)
+    font_guess = pygame.freetype.Font("raize-13.pcf", GUESS_FONT_SIZE)
+    text_height = font_guess.get_sized_height()
+    baseline_offset = font_guess.get_sized_height()  # Distance from bottom to text baseline
+    char_width = 8
+
     font_small = pygame.freetype.Font("scientifica-11.bdf", 11)
     screen = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
     letters = rules[0][0]
     guess = ""
-    cursor_pos = 0  # Add cursor position tracking
+    cursor_pos = 0
+    
+    # Pre-create cursor surface
+    cursor_width = char_width
+    cursor_height = 1
+    cursor = pygame.Surface((cursor_width, cursor_height))
+    cursor.fill(Color("green"))
     
     while True:
         if quit_app:
@@ -184,22 +202,19 @@ async def run_game():
         show_cursor = (pygame.time.get_ticks()*2 // 1000) % 2 == 0
 
         # Draw the guess text without cursor
+        # r = [x, y, w, h] of rendered text box
         line_surf, r = font_guess.render(guess[:16], Color("green"), Color("black"))
-        screen.blit(line_surf, (0, 9-r[1]))
+        screen.blit(line_surf, (0, GUESS_FIRST_LINE_Y - r[3]))
         line_surf, r = font_guess.render(guess[16:], Color("green"), Color("black"))
-        screen.blit(line_surf, (0, 21-r[1]))
+        screen.blit(line_surf, (0, GUESS_SECOND_LINE_Y - r[3]))
 
         # Draw cursor line if it should be shown
         if show_cursor:
-            cursor_y = 21-r[1] if cursor_pos >= 16 else 9-r[1]
-            # Calculate x position based on character width (assuming monospace font)
-            char_width = 8  # Adjust this value based on your font
+            cursor_y = GUESS_FIRST_LINE_Y + CURSOR_OFFSET if cursor_pos < 16 else GUESS_SECOND_LINE_Y + CURSOR_OFFSET
             cursor_x = (cursor_pos % 16) * char_width
-            pygame.draw.line(screen, Color("green"), 
-                (cursor_x, cursor_y), 
-                (cursor_x, cursor_y + 13))  # Adjust line height as needed
+            screen.blit(cursor, (cursor_x, cursor_y))
 
-        font_small.render_to(screen, (0, 23), letters, Color("red"), Color("black"))
+        font_small.render_to(screen, (0, MESSAGE_THIRD_LINE_Y), letters, Color("red"), Color("black"))
 
         for key in get_key():
             if key == "quit":
@@ -239,9 +254,9 @@ async def main():
             trigger_events_from_mqtt(subscribe_client),
             name="mqtt subscribe handler")
 
-    await run_game()
-    subscribe_task.cancel()
-    pygame.quit()
+        await run_game()
+        subscribe_task.cancel()
+        pygame.quit()
 
 if __name__ == "__main__":
     if platform.system() != "Darwin":
