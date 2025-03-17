@@ -179,8 +179,6 @@ async def run_game():
     pygame.display.set_caption('Circus Circus')
 
     font_guess = pygame.freetype.Font("raize-13.pcf", GUESS_FONT_SIZE)
-    text_height = font_guess.get_sized_height()
-    baseline_offset = font_guess.get_sized_height()  # Distance from bottom to text baseline
     char_width = 8
 
     font_small = pygame.freetype.Font("scientifica-11.bdf", 11)
@@ -193,9 +191,8 @@ async def run_game():
     pygame.key.set_repeat(500, 50)  # 500ms initial delay, 50ms repeat interval
     
     # Pre-create cursor surface
-    cursor_width = char_width
     cursor_height = 1
-    cursor = pygame.Surface((cursor_width, cursor_height))
+    cursor = pygame.Surface((char_width, cursor_height))
     cursor.fill(Color("green"))
     
     while True:
