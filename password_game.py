@@ -21,8 +21,16 @@ import hub75
 SCALING_FACTOR = 9
 SCREEN_WIDTH = 128
 SCREEN_HEIGHT = 32
+GUESS_FONT_SIZE = 13
+GUESS_FONT_HEIGHT = 9
 
 MQTT_SERVER = os.environ.get("MQTT_SERVER", "localhost")
+
+CURSOR_OFFSET = 1
+LINE_SPACING = 2
+GUESS_FIRST_LINE_Y = GUESS_FONT_HEIGHT
+GUESS_SECOND_LINE_Y = 2 * GUESS_FONT_HEIGHT + LINE_SPACING
+MESSAGE_THIRD_LINE_Y = 24
 
 MATRIX = [
     "APOC",
@@ -170,32 +178,68 @@ async def run_game():
 
     pygame.display.set_caption('Circus Circus')
 
-    font_guess = pygame.freetype.Font("raize-13.pcf", 13)
+    font_guess = pygame.freetype.Font("raize-13.pcf", GUESS_FONT_SIZE)
+    char_width = 8
+
     font_small = pygame.freetype.Font("scientifica-11.bdf", 11)
     screen = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
     letters = rules[0][0]
     guess = ""
+    cursor_pos = 0
+    
+    # Key repeat settings
+    pygame.key.set_repeat(500, 50)  # 500ms initial delay, 50ms repeat interval
+    
+    # Pre-create cursor surface
+    cursor_height = 1
+    cursor = pygame.Surface((char_width, cursor_height))
+    cursor.fill(Color("green"))
+    
     while True:
         if quit_app:
             return
         screen.fill((0, 0, 0))
         show_cursor = (pygame.time.get_ticks()*2 // 1000) % 2 == 0
-        print_guess = guess + ("_" if show_cursor else " ")
-        line_surf, r = font_guess.render(print_guess[:16], Color("green"), Color("black"))
-        screen.blit(line_surf, (r[0], 9-r[1]))
-        line_surf, r = font_guess.render(print_guess[16:], Color("green"), Color("black"))
-        screen.blit(line_surf, (r[0], 21-r[1]))
-        font_small.render_to(screen, (0, 23), letters, Color("red"), Color("black"))
 
+        # Draw the guess text without cursor
+        # r = [x, y, w, h] of rendered text box
+        line_surf, r = font_guess.render(guess[:16], Color("green"), Color("black"))
+        screen.blit(line_surf, (0, GUESS_FIRST_LINE_Y - r[3]))
+        line_surf, r = font_guess.render(guess[16:], Color("green"), Color("black"))
+        screen.blit(line_surf, (0, GUESS_SECOND_LINE_Y - r[3]))
+
+        # Draw cursor line if it should be shown
+        if show_cursor:
+            cursor_y = GUESS_FIRST_LINE_Y + CURSOR_OFFSET if cursor_pos < 16 else GUESS_SECOND_LINE_Y + CURSOR_OFFSET
+            cursor_x = (cursor_pos % 16) * char_width
+            screen.blit(cursor, (cursor_x, cursor_y))
+
+        font_small.render_to(screen, (0, MESSAGE_THIRD_LINE_Y), letters, Color("red"), Color("black"))
+
+        # Handle pygame events for key repeat
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    guess = ""
+                    cursor_pos = 0
+                elif event.key == pygame.K_BACKSPACE:
+                    if cursor_pos > 0:
+                        guess = guess[:cursor_pos-1] + guess[cursor_pos:]
+                        cursor_pos -= 1
+                elif event.key == pygame.K_LEFT:
+                    cursor_pos = max(0, cursor_pos - 1)
+                elif event.key == pygame.K_RIGHT:
+                    cursor_pos = min(len(guess), cursor_pos + 1)
+                elif event.key == pygame.K_TAB:
+                    continue
+                elif len(event.unicode) == 1 and len(guess) < 32:
+                    guess = guess[:cursor_pos] + event.unicode + guess[cursor_pos:]
+                    cursor_pos = min(cursor_pos + 1, 31)
+
+        # Keep the get_key() for other input handling
         for key in get_key():
             if key == "quit":
                 return
-            if key == "escape":
-                guess = ""
-            elif key == "backspace":
-                guess = guess[:-1]
-            elif len(key) == 1:
-                guess += key
 
         for rule in rules:
             if not rule[1](guess):
