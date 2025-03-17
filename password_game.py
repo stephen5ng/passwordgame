@@ -189,6 +189,9 @@ async def run_game():
     guess = ""
     cursor_pos = 0
     
+    # Key repeat settings
+    pygame.key.set_repeat(500, 50)  # 500ms initial delay, 50ms repeat interval
+    
     # Pre-create cursor surface
     cursor_width = char_width
     cursor_height = 1
@@ -216,23 +219,30 @@ async def run_game():
 
         font_small.render_to(screen, (0, MESSAGE_THIRD_LINE_Y), letters, Color("red"), Color("black"))
 
+        # Handle pygame events for key repeat
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    guess = ""
+                    cursor_pos = 0
+                elif event.key == pygame.K_BACKSPACE:
+                    if cursor_pos > 0:
+                        guess = guess[:cursor_pos-1] + guess[cursor_pos:]
+                        cursor_pos -= 1
+                elif event.key == pygame.K_LEFT:
+                    cursor_pos = max(0, cursor_pos - 1)
+                elif event.key == pygame.K_RIGHT:
+                    cursor_pos = min(len(guess), cursor_pos + 1)
+                elif event.key == pygame.K_TAB:
+                    continue
+                elif len(event.unicode) == 1 and len(guess) < 32:
+                    guess = guess[:cursor_pos] + event.unicode + guess[cursor_pos:]
+                    cursor_pos = min(cursor_pos + 1, 31)
+
+        # Keep the get_key() for other input handling
         for key in get_key():
             if key == "quit":
                 return
-            if key == "escape":
-                guess = ""
-                cursor_pos = 0
-            elif key == "backspace":
-                if cursor_pos > 0:
-                    guess = guess[:cursor_pos-1] + guess[cursor_pos:]
-                    cursor_pos -= 1
-            elif key == "left":
-                cursor_pos = max(0, cursor_pos - 1)
-            elif key == "right":
-                cursor_pos = min(len(guess), cursor_pos + 1)
-            elif len(key) == 1:
-                guess = guess[:cursor_pos] + key + guess[cursor_pos:]
-                cursor_pos += 1
 
         for rule in rules:
             if not rule[1](guess):
