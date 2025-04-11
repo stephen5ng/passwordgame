@@ -171,7 +171,9 @@ class LoginWindow(QMainWindow):
         return [
             self._check_min_length,
             self._check_has_number,
-            self._check_has_uppercase
+            self._check_has_uppercase,
+            self._check_has_special_char,
+            self._check_has_roman_numeral
         ]
     
     def _check_min_length(self, password):
@@ -187,6 +189,18 @@ class LoginWindow(QMainWindow):
     def _check_has_uppercase(self, password):
         if not any(c.isupper() for c in password):
             return "Your password must include an uppercase letter."
+        return None
+    
+    def _check_has_special_char(self, password):
+        special_chars = "!@#$%^&*()-_=+[]{}|;:,.<>?/"
+        if not any(c in special_chars for c in password):
+            return "Your password must contain a special character."
+        return None
+    
+    def _check_has_roman_numeral(self, password):
+        roman_numerals = {'I', 'V', 'X', 'L', 'C', 'D', 'M'}
+        if not any(c in roman_numerals for c in password):
+            return "Your password must include a Roman numeral."
         return None
     
     def handle_password_change(self):
