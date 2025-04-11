@@ -104,7 +104,7 @@ class LoginWindow(QMainWindow):
         welcome_label.setStyleSheet("font-size: 24px; font-weight: bold;")
         welcome_label.setAlignment(Qt.AlignCenter)
         
-        message_label = QLabel("IT HAS BEEN 30 DAYS SINCE YOU LAST CHANGED YOUR PASSWORD.\nCHANGE YOUR PASSWORD NOW TO CONTINUE.")
+        message_label = QLabel("IT HAS BEEN 30 DAYS SINCE YOU LAST CHANGED YOUR PASSWORD.\nYOU MUST CHANGE YOUR PASSWORD NOW FOR ACCESS.")
         message_label.setStyleSheet("font-size: 18px;")
         message_label.setAlignment(Qt.AlignCenter)
         
@@ -127,7 +127,7 @@ class LoginWindow(QMainWindow):
             if item.widget():
                 item.widget().deleteLater()
         
-        prompt_label = QLabel("Please choose a password")
+        prompt_label = QLabel("Please choose a new password")
         prompt_label.setStyleSheet("font-size: 24px; font-weight: bold;")
         prompt_label.setAlignment(Qt.AlignCenter)
         
@@ -152,24 +152,50 @@ class LoginWindow(QMainWindow):
     
     def validate_password(self):
         password = self.new_password_input.text()
-        if len(password) > 0 and len(password) < 5:
-            self.error_label.setText("Your password must be at least 5 characters.")
-            self.submit_button.setEnabled(False)
-        elif len(password) >= 5 and not any(c.isdigit() for c in password):
-            self.error_label.setText("Your password must include a number.")
-            self.submit_button.setEnabled(False)
-        else:
+        if not password:
             self.error_label.setText("")
-            self.submit_button.setEnabled(True)
+            self.submit_button.setEnabled(False)
+            return
+            
+        for constraint in self.password_constraints():
+            error = constraint(password)
+            if error:
+                self.error_label.setText(error)
+                self.submit_button.setEnabled(False)
+                return
+                
+        self.error_label.setText("")
+        self.submit_button.setEnabled(True)
+    
+    def password_constraints(self):
+        return [
+            self._check_min_length,
+            self._check_has_number,
+            self._check_has_uppercase
+        ]
+    
+    def _check_min_length(self, password):
+        if len(password) < 5:
+            return "Your password must be at least 5 characters."
+        return None
+    
+    def _check_has_number(self, password):
+        if not any(c.isdigit() for c in password):
+            return "Your password must include a number."
+        return None
+    
+    def _check_has_uppercase(self, password):
+        if not any(c.isupper() for c in password):
+            return "Your password must include an uppercase letter."
+        return None
     
     def handle_password_change(self):
         new_password = self.new_password_input.text()
-        if len(new_password) < 5:
-            self.error_label.setText("Your password must be at least 5 characters.")
-            return
-        if not any(c.isdigit() for c in new_password):
-            self.error_label.setText("Your password must include a number.")
-            return
+        for constraint in self.password_constraints():
+            error = constraint(new_password)
+            if error:
+                self.error_label.setText(error)
+                return
         self.show_fake_desktop()
     
     def show_fake_desktop(self):
