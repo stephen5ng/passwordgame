@@ -128,6 +128,12 @@ class LoginWindow(QMainWindow):
         self.new_password_input = QLineEdit()
         self.new_password_input.setPlaceholderText("Enter new password")
         self.new_password_input.setFixedWidth(300)
+        self.new_password_input.textChanged.connect(self.validate_password)
+        
+        # Create error message label
+        self.error_label = QLabel("")
+        self.error_label.setStyleSheet("color: red;")
+        self.error_label.setAlignment(Qt.AlignCenter)
         
         # Create submit button
         submit_button = QPushButton("Submit")
@@ -137,10 +143,21 @@ class LoginWindow(QMainWindow):
         # Add widgets to layout
         self.layout.addWidget(prompt_label)
         self.layout.addWidget(self.new_password_input)
+        self.layout.addWidget(self.error_label)
         self.layout.addWidget(submit_button)
+    
+    def validate_password(self):
+        password = self.new_password_input.text()
+        if len(password) > 0 and len(password) < 5:
+            self.error_label.setText("Your password must be at least 5 characters.")
+        else:
+            self.error_label.setText("")
     
     def handle_password_change(self):
         new_password = self.new_password_input.text()
+        if len(new_password) < 5:
+            self.error_label.setText("Your password must be at least 5 characters.")
+            return
         # TODO: Implement password change logic
         self.close()
     
