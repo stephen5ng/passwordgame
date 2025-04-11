@@ -3,14 +3,15 @@ import sys
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QLabel, QLineEdit, QPushButton)
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor, QPalette, QKeyEvent, QCloseEvent
+from PySide6.QtGui import QColor, QPalette, QKeyEvent, QCloseEvent, QPixmap
+from PySide6.QtWidgets import QHBoxLayout
 
 class LoginWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, skip_to=None):
         super().__init__()
         self.setWindowTitle("Login")
         
-        # Set window flags to prevent closing while allowing keyboard input
+        # Set window flags to prevent closing
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
         
         # Set window to full screen
@@ -21,6 +22,24 @@ class LoginWindow(QMainWindow):
         self.setCentralWidget(self.central_widget)
         self.layout = QVBoxLayout(self.central_widget)
         self.layout.setAlignment(Qt.AlignCenter)
+        
+        # Track if login was successful
+        self._login_successful = False
+        
+        # Skip to specified screen if argument provided
+        if skip_to == "1":
+            self.show_password_screen()
+        elif skip_to == "2":
+            self.show_fake_desktop()
+        else:
+            self.show_login_screen()
+    
+    def show_login_screen(self):
+        # Clear the layout
+        while self.layout.count():
+            item = self.layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
         
         # Username
         self.username_label = QLabel("Username:")
@@ -55,9 +74,6 @@ class LoginWindow(QMainWindow):
         
         # Set focus to username field
         self.username_input.setFocus()
-        
-        # Track if login was successful
-        self._login_successful = False
     
     def closeEvent(self, event: QCloseEvent):
         # Only allow closing if login was successful
@@ -120,7 +136,7 @@ class LoginWindow(QMainWindow):
                 item.widget().deleteLater()
         
         # Create password prompt
-        prompt_label = QLabel("Please choose a new password")
+        prompt_label = QLabel("Please choose a password")
         prompt_label.setStyleSheet("font-size: 24px; font-weight: bold;")
         prompt_label.setAlignment(Qt.AlignCenter)
         
@@ -167,8 +183,31 @@ class LoginWindow(QMainWindow):
         if not any(c.isdigit() for c in new_password):
             self.error_label.setText("Your password must include a number.")
             return
-        # TODO: Implement password change logic
-        self.close()
+        self.show_fake_desktop()
+    
+    def show_fake_desktop(self):
+        # Clear the layout
+        while self.layout.count():
+            item = self.layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+        
+        # Create a horizontal layout for the bottom of the screen
+        bottom_layout = QHBoxLayout()
+        bottom_layout.addStretch()  # Add stretch to push the trash can to the right
+        
+        # Create trash can icon
+        trash_label = QLabel()
+        pixmap = QPixmap("trashcan.png")
+        # Scale the pixmap to 1/4 of its original size
+        scaled_pixmap = pixmap.scaled(pixmap.width() // 4, pixmap.height() // 4, 
+                                    Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        trash_label.setPixmap(scaled_pixmap)
+        bottom_layout.addWidget(trash_label)
+        
+        # Add bottom layout to main layout
+        self.layout.addStretch()  # Add stretch to push everything to the bottom
+        self.layout.addLayout(bottom_layout)
     
     def handle_login(self):
         username = self.username_input.text()
@@ -187,6 +226,7 @@ class LoginWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = LoginWindow()
+    skip_to = sys.argv[1] if len(sys.argv) > 1 else None
+    window = LoginWindow(skip_to)
     window.show()
     sys.exit(app.exec()) 
