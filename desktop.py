@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import pygame
 import sys
+import time
 
 # Initialize Pygame
 pygame.init()
@@ -45,12 +46,20 @@ color_active = BLUE
 # Input states
 username = ''
 password = ''
-active_field = None
+active_field = 'username'  # Set username field as active by default
 clock = pygame.time.Clock()
+cursor_visible = True
+last_cursor_toggle = time.time()
+password_selected = False  # Track if password text is selected
 
 # Main game loop
 running = True
 while running:
+    current_time = time.time()
+    if current_time - last_cursor_toggle > 0.5:  # Toggle cursor every 0.5 seconds
+        cursor_visible = not cursor_visible
+        last_cursor_toggle = current_time
+    print(f"password: {password}")
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -59,28 +68,46 @@ while running:
             # Check which field was clicked
             if username_box.collidepoint(event.pos):
                 active_field = 'username'
+                password_selected = False
             elif password_box.collidepoint(event.pos):
                 active_field = 'password'
+                password_selected = False
             else:
                 active_field = None
+                password_selected = False
         
         if event.type == pygame.KEYDOWN:
-            if active_field:
+            if event.key == pygame.K_TAB:
+                # Switch between fields when tab is pressed
+                if active_field == 'username':
+                    active_field = 'password'
+                else:
+                    active_field = 'username'
+                password_selected = False
+            elif active_field:
                 if event.key == pygame.K_RETURN:
+                    if username == 'jhulzo' and password == 'password':
+                        running = False
+                    else:
+                        active_field = 'password'
+                        password_selected = True
                     print(f"Username: {username}")
                     print(f"Password: {password}")
-                    username = ''
-                    password = ''
+                    if username == 'jhulzo' and password == 'password':
+                        username = ''
+                        password = ''
                 elif event.key == pygame.K_BACKSPACE:
                     if active_field == 'username':
                         username = username[:-1]
                     else:
                         password = password[:-1]
+                    password_selected = False
                 else:
                     if active_field == 'username':
                         username += event.unicode
                     else:
                         password += event.unicode
+                    password_selected = False
 
     # Clear screen
     screen.fill(WHITE)
@@ -103,8 +130,31 @@ while running:
     pygame.draw.rect(screen, username_color, username_box, 2)
     pygame.draw.rect(screen, password_color, password_box, 2)
     
-    screen.blit(username_surface, (username_box.x + 5, username_box.y + 5))
-    screen.blit(password_surface, (password_box.x + 5, password_box.y + 5))
+    # Draw text and cursor
+    if active_field == 'username':
+        screen.blit(username_surface, (username_box.x + 5, username_box.y + 5))
+        if cursor_visible and not password_selected:
+            cursor_x = username_box.x + 5 + username_surface.get_width()
+            pygame.draw.line(screen, BLACK, 
+                           (cursor_x, username_box.y + 5),
+                           (cursor_x, username_box.y + input_height - 5), 2)
+    else:
+        screen.blit(username_surface, (username_box.x + 5, username_box.y + 5))
+    
+    if active_field == 'password':
+        if password_selected:
+            # Draw selection background
+            pygame.draw.rect(screen, (200, 200, 255), 
+                           (password_box.x + 5, password_box.y + 5,
+                            password_surface.get_width(), input_height - 10))
+        screen.blit(password_surface, (password_box.x + 5, password_box.y + 5))
+        if cursor_visible and not password_selected:
+            cursor_x = password_box.x + 5 + password_surface.get_width()
+            pygame.draw.line(screen, BLACK,
+                           (cursor_x, password_box.y + 5),
+                           (cursor_x, password_box.y + input_height - 5), 2)
+    else:
+        screen.blit(password_surface, (password_box.x + 5, password_box.y + 5))
     
     # Update the display
     pygame.display.flip()
