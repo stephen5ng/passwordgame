@@ -3,3 +3,5 @@ pillow
 pygame-ce
 RGBMatrixEmulator
 typing_extensions
+pygame==2.5.2
+pyside6==6.6.1
