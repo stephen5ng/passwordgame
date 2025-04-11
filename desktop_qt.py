@@ -5,6 +5,24 @@ from PySide6.QtGui import QKeyEvent, QCloseEvent, QPixmap
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QLabel, QLineEdit, QPushButton, QDialog, QHBoxLayout)
 
+
+MATRIX = [
+    "APOC",
+    "CHOI",
+    "CYPHER",
+    "DOZER",
+    "DUFOUR",
+    "MORPHEUS",
+    "MOUSE",
+    "NEO",
+    "ORACLE",
+    "RHINEHEART",
+    "SMITH",
+    "SWITCH",
+    "TANK",
+    "TRINITY",
+]
+
 class SecretWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -173,7 +191,8 @@ class LoginWindow(QMainWindow):
             self._check_has_number,
             self._check_has_uppercase,
             self._check_has_special_char,
-            self._check_has_roman_numeral
+            self._check_has_roman_numeral,
+            self._check_has_matrix_char
         ]
     
     def _check_min_length(self, password):
@@ -201,6 +220,11 @@ class LoginWindow(QMainWindow):
         roman_numerals = {'I', 'V', 'X', 'L', 'C', 'D', 'M'}
         if not any(c in roman_numerals for c in password):
             return "Your password must include a Roman numeral."
+        return None
+    
+    def _check_has_matrix_char(self, password):
+        if not any(character in password.upper() for character in MATRIX):
+            return "Your password must contain a character from The Matrix."
         return None
     
     def handle_password_change(self):
