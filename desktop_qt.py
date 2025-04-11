@@ -5,6 +5,22 @@ from PySide6.QtGui import QKeyEvent, QCloseEvent, QPixmap
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QLabel, QLineEdit, QPushButton, QDialog, QHBoxLayout)
 
+MATRIX = [
+    "APOC",
+    "CHOI",
+    "CYPHER",
+    "DOZER",
+    "DUFOUR",
+    "MORPHEUS",
+    "MOUSE",
+    "NEO",
+    "ORACLE",
+    "RHINEHEART",
+    "SMITH",
+    "SWITCH",
+    "TANK",
+    "TRINITY",
+]
 class SecretWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -108,7 +124,7 @@ class LoginWindow(QMainWindow):
             if item.widget():
                 item.widget().deleteLater()
         
-        welcome_label = QLabel("WELCOME JEFF HULZO!")
+        welcome_label = QLabel("WELCOME JOHN HULZO!")
         welcome_label.setStyleSheet("font-size: 24px; font-weight: bold;")
         welcome_label.setAlignment(Qt.AlignCenter)
         
@@ -190,7 +206,9 @@ class LoginWindow(QMainWindow):
             self._check_has_number,
             self._check_has_uppercase,
             self._check_has_special_char,
-            self._check_has_roman_numeral
+            self._check_has_roman_numeral,
+            self._check_has_matrix_char,
+            self._check_has_lost_number
         ]
     
     def _check_min_length(self, password):
@@ -218,6 +236,17 @@ class LoginWindow(QMainWindow):
         roman_numerals = {'I', 'V', 'X', 'L', 'C', 'D', 'M'}
         if not any(c in roman_numerals for c in password):
             return "Your password must include a Roman numeral."
+        return None
+    
+    def _check_has_matrix_char(self, password):
+        if not any(character in password.upper() for character in MATRIX):
+            return "Your password must contain a character from The Matrix."
+        return None
+    
+    def _check_has_lost_number(self, password):
+        lost_numbers = {'4', '8', '15', '16', '23', '42'}
+        if not any(str(num) in password for num in lost_numbers):
+            return "Your password must include a number from the TV show LOST."
         return None
     
     def handle_password_change(self):
