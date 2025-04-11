@@ -96,10 +96,54 @@ class LoginWindow(QMainWindow):
         message_label.setStyleSheet("font-size: 18px;")
         message_label.setAlignment(Qt.AlignCenter)
         
+        # Create button container with horizontal layout
+        button_container = QWidget()
+        button_layout = QVBoxLayout(button_container)
+        button_layout.setAlignment(Qt.AlignCenter)
+        
+        # Add OK button
+        ok_button = QPushButton("OK")
+        ok_button.setFixedWidth(300)
+        ok_button.clicked.connect(self.show_password_screen)
+        button_layout.addWidget(ok_button)
+        
         # Add welcome message to layout
         self.layout.addWidget(welcome_label)
         self.layout.addWidget(message_label)
+        self.layout.addWidget(button_container)
+    
+    def show_password_screen(self):
+        # Clear the layout
+        while self.layout.count():
+            item = self.layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
         
+        # Create password prompt
+        prompt_label = QLabel("Please choose a password")
+        prompt_label.setStyleSheet("font-size: 24px; font-weight: bold;")
+        prompt_label.setAlignment(Qt.AlignCenter)
+        
+        # Create password input
+        self.new_password_input = QLineEdit()
+        self.new_password_input.setPlaceholderText("Enter new password")
+        self.new_password_input.setFixedWidth(300)
+        
+        # Create submit button
+        submit_button = QPushButton("Submit")
+        submit_button.setFixedWidth(300)
+        submit_button.clicked.connect(self.handle_password_change)
+        
+        # Add widgets to layout
+        self.layout.addWidget(prompt_label)
+        self.layout.addWidget(self.new_password_input)
+        self.layout.addWidget(submit_button)
+    
+    def handle_password_change(self):
+        new_password = self.new_password_input.text()
+        # TODO: Implement password change logic
+        self.close()
+    
     def handle_login(self):
         username = self.username_input.text()
         password = self.password_input.text()
