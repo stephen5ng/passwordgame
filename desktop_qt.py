@@ -10,17 +10,17 @@ class LoginWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Login")
         
-        # Remove window frame and keep window on top
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        # Set window flags to prevent closing while allowing keyboard input
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
         
         # Set window to full screen
         self.showFullScreen()
         
         # Create central widget and layout
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        layout = QVBoxLayout(central_widget)
-        layout.setAlignment(Qt.AlignCenter)
+        self.central_widget = QWidget()
+        self.setCentralWidget(self.central_widget)
+        self.layout = QVBoxLayout(self.central_widget)
+        self.layout.setAlignment(Qt.AlignCenter)
         
         # Username
         self.username_label = QLabel("Username:")
@@ -46,12 +46,12 @@ class LoginWindow(QMainWindow):
         self.login_button.clicked.connect(self.handle_login)
         
         # Add widgets to layout
-        layout.addWidget(self.username_label)
-        layout.addWidget(self.username_input)
-        layout.addWidget(self.password_label)
-        layout.addWidget(self.password_input)
-        layout.addWidget(self.status_label)
-        layout.addWidget(self.login_button)
+        self.layout.addWidget(self.username_label)
+        self.layout.addWidget(self.username_input)
+        self.layout.addWidget(self.password_label)
+        self.layout.addWidget(self.password_input)
+        self.layout.addWidget(self.status_label)
+        self.layout.addWidget(self.login_button)
         
         # Set focus to username field
         self.username_input.setFocus()
@@ -79,6 +79,26 @@ class LoginWindow(QMainWindow):
             
         # Allow all other key events
         super().keyPressEvent(event)
+    
+    def show_welcome_message(self):
+        # Clear the layout
+        while self.layout.count():
+            item = self.layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+        
+        # Create welcome message
+        welcome_label = QLabel("WELCOME JEFF HULZO!")
+        welcome_label.setStyleSheet("font-size: 24px; font-weight: bold;")
+        welcome_label.setAlignment(Qt.AlignCenter)
+        
+        message_label = QLabel("IT HAS BEEN 30 DAYS SINCE YOU LAST CHANGED YOUR PASSWORD.\nCHANGE YOUR PASSWORD NOW TO CONTINUE.")
+        message_label.setStyleSheet("font-size: 18px;")
+        message_label.setAlignment(Qt.AlignCenter)
+        
+        # Add welcome message to layout
+        self.layout.addWidget(welcome_label)
+        self.layout.addWidget(message_label)
         
     def handle_login(self):
         username = self.username_input.text()
@@ -88,7 +108,7 @@ class LoginWindow(QMainWindow):
             self.status_label.setText("Login successful!")
             self.status_label.setStyleSheet("color: green;")
             self._login_successful = True
-            self.close()
+            self.show_welcome_message()
         else:
             self.status_label.setText("Invalid login")
             self.status_label.setStyleSheet("color: red;")
