@@ -3,15 +3,15 @@ import sys
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QLabel, QLineEdit, QPushButton)
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor, QPalette
+from PySide6.QtGui import QColor, QPalette, QKeyEvent, QCloseEvent
 
 class LoginWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Login")
         
-        # Remove window frame, close button, and disable keyboard shortcuts
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.WindowDoesNotAcceptFocus)
+        # Remove window frame and keep window on top
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         
         # Set window to full screen
         self.showFullScreen()
@@ -56,6 +56,30 @@ class LoginWindow(QMainWindow):
         # Set focus to username field
         self.username_input.setFocus()
         
+        # Track if login was successful
+        self._login_successful = False
+    
+    def closeEvent(self, event: QCloseEvent):
+        # Only allow closing if login was successful
+        if not self._login_successful:
+            event.ignore()
+    
+    def keyPressEvent(self, event: QKeyEvent):
+        # Block specific system shortcuts
+        if (event.key() == Qt.Key_F4 and event.modifiers() == Qt.AltModifier) or \
+           (event.key() == Qt.Key_W and event.modifiers() == Qt.ControlModifier) or \
+           (event.key() == Qt.Key_Q and (event.modifiers() == Qt.ControlModifier or event.modifiers() == Qt.MetaModifier)):
+            event.ignore()
+            return
+            
+        # Handle Enter key for login
+        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+            self.handle_login()
+            return
+            
+        # Allow all other key events
+        super().keyPressEvent(event)
+        
     def handle_login(self):
         username = self.username_input.text()
         password = self.password_input.text()
@@ -63,6 +87,7 @@ class LoginWindow(QMainWindow):
         if username == "jhulzo" and password == "password":
             self.status_label.setText("Login successful!")
             self.status_label.setStyleSheet("color: green;")
+            self._login_successful = True
             self.close()
         else:
             self.status_label.setText("Invalid login")
