@@ -3,3 +3,7 @@ pillow
 pygame-ce
 RGBMatrixEmulator
 typing_extensions
+bottle==0.12.25
+beaker==1.12.1
+pygame==2.5.2
+pygame_gui==0.6.9
