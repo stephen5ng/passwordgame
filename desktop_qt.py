@@ -1,10 +1,30 @@
 #!/usr/bin/env python3
 import sys
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
-                             QLabel, QLineEdit, QPushButton)
+                             QLabel, QLineEdit, QPushButton, QDialog)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QPalette, QKeyEvent, QCloseEvent, QPixmap
 from PySide6.QtWidgets import QHBoxLayout
+
+class SecretWindow(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("HULZO SECRETS")
+        self.setFixedSize(400, 200)
+        
+        # Create layout
+        layout = QVBoxLayout(self)
+        
+        # Add message
+        message = QLabel("MEET TONIGHT AT 8PM TO DISCUSS BETRAYAL OF DOCTOR PROFESSOR.")
+        message.setAlignment(Qt.AlignCenter)
+        message.setWordWrap(True)
+        layout.addWidget(message)
+        
+        # Add OK button
+        ok_button = QPushButton("OK")
+        ok_button.clicked.connect(self.accept)
+        layout.addWidget(ok_button)
 
 class LoginWindow(QMainWindow):
     def __init__(self, skip_to=None):
@@ -203,11 +223,16 @@ class LoginWindow(QMainWindow):
         scaled_pixmap = pixmap.scaled(pixmap.width() // 4, pixmap.height() // 4, 
                                     Qt.KeepAspectRatio, Qt.SmoothTransformation)
         trash_label.setPixmap(scaled_pixmap)
+        trash_label.mousePressEvent = self.show_secret_window
         bottom_layout.addWidget(trash_label)
         
         # Add bottom layout to main layout
         self.layout.addStretch()  # Add stretch to push everything to the bottom
         self.layout.addLayout(bottom_layout)
+    
+    def show_secret_window(self, event):
+        secret_window = SecretWindow(self)
+        secret_window.exec()
     
     def handle_login(self):
         username = self.username_input.text()
