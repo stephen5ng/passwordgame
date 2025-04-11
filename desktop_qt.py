@@ -120,7 +120,7 @@ class LoginWindow(QMainWindow):
                 item.widget().deleteLater()
         
         # Create password prompt
-        prompt_label = QLabel("Please choose a password")
+        prompt_label = QLabel("Please choose a new password")
         prompt_label.setStyleSheet("font-size: 24px; font-weight: bold;")
         prompt_label.setAlignment(Qt.AlignCenter)
         
@@ -136,27 +136,36 @@ class LoginWindow(QMainWindow):
         self.error_label.setAlignment(Qt.AlignCenter)
         
         # Create submit button
-        submit_button = QPushButton("Submit")
-        submit_button.setFixedWidth(300)
-        submit_button.clicked.connect(self.handle_password_change)
+        self.submit_button = QPushButton("Submit")
+        self.submit_button.setFixedWidth(300)
+        self.submit_button.clicked.connect(self.handle_password_change)
+        self.submit_button.setEnabled(False)  # Initially disabled
         
         # Add widgets to layout
         self.layout.addWidget(prompt_label)
         self.layout.addWidget(self.new_password_input)
         self.layout.addWidget(self.error_label)
-        self.layout.addWidget(submit_button)
+        self.layout.addWidget(self.submit_button)
     
     def validate_password(self):
         password = self.new_password_input.text()
         if len(password) > 0 and len(password) < 5:
             self.error_label.setText("Your password must be at least 5 characters.")
+            self.submit_button.setEnabled(False)
+        elif len(password) >= 5 and not any(c.isdigit() for c in password):
+            self.error_label.setText("Your password must include a number.")
+            self.submit_button.setEnabled(False)
         else:
             self.error_label.setText("")
+            self.submit_button.setEnabled(True)
     
     def handle_password_change(self):
         new_password = self.new_password_input.text()
         if len(new_password) < 5:
             self.error_label.setText("Your password must be at least 5 characters.")
+            return
+        if not any(c.isdigit() for c in new_password):
+            self.error_label.setText("Your password must include a number.")
             return
         # TODO: Implement password change logic
         self.close()
