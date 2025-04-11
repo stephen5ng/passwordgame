@@ -5,24 +5,6 @@ from PySide6.QtGui import QKeyEvent, QCloseEvent, QPixmap
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QLabel, QLineEdit, QPushButton, QDialog, QHBoxLayout)
 
-
-MATRIX = [
-    "APOC",
-    "CHOI",
-    "CYPHER",
-    "DOZER",
-    "DUFOUR",
-    "MORPHEUS",
-    "MOUSE",
-    "NEO",
-    "ORACLE",
-    "RHINEHEART",
-    "SMITH",
-    "SWITCH",
-    "TANK",
-    "TRINITY",
-]
-
 class SecretWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -67,6 +49,13 @@ class LoginWindow(QMainWindow):
             if item.widget():
                 item.widget().deleteLater()
         
+        # Add Hulzos logo to top right
+        logo_label = QLabel()
+        logo_pixmap = QPixmap("hulzos.png")
+        logo_label.setPixmap(logo_pixmap.scaled(100, 100, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        logo_label.setAlignment(Qt.AlignCenter)
+        self.layout.addWidget(logo_label)
+        
         self.username_label = QLabel("Username:")
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText("Enter username")
@@ -107,7 +96,8 @@ class LoginWindow(QMainWindow):
             return
             
         if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
-            self.handle_login()
+            if hasattr(self, 'username_input') and hasattr(self, 'password_input'):
+                self.handle_login()
             return
             
         super().keyPressEvent(event)
@@ -145,9 +135,15 @@ class LoginWindow(QMainWindow):
             if item.widget():
                 item.widget().deleteLater()
         
+        container = QWidget()
+        container_layout = QVBoxLayout(container)
+        container_layout.setAlignment(Qt.AlignCenter)
+        container_layout.setSpacing(20)
+        
         prompt_label = QLabel("Please choose a new password")
         prompt_label.setStyleSheet("font-size: 24px; font-weight: bold;")
         prompt_label.setAlignment(Qt.AlignCenter)
+        prompt_label.setFixedWidth(400)
         
         self.new_password_input = QLineEdit()
         self.new_password_input.setPlaceholderText("Enter new password")
@@ -157,16 +153,19 @@ class LoginWindow(QMainWindow):
         self.error_label = QLabel("")
         self.error_label.setStyleSheet("color: red;")
         self.error_label.setAlignment(Qt.AlignCenter)
+        self.error_label.setFixedWidth(400)
         
         self.submit_button = QPushButton("Submit")
         self.submit_button.setFixedWidth(300)
         self.submit_button.clicked.connect(self.handle_password_change)
         self.submit_button.setEnabled(False)
         
-        self.layout.addWidget(prompt_label)
-        self.layout.addWidget(self.new_password_input)
-        self.layout.addWidget(self.error_label)
-        self.layout.addWidget(self.submit_button)
+        container_layout.addWidget(prompt_label, alignment=Qt.AlignCenter)
+        container_layout.addWidget(self.new_password_input, alignment=Qt.AlignCenter)
+        container_layout.addWidget(self.error_label, alignment=Qt.AlignCenter)
+        container_layout.addWidget(self.submit_button, alignment=Qt.AlignCenter)
+        
+        self.layout.addWidget(container, alignment=Qt.AlignCenter)
     
     def validate_password(self):
         password = self.new_password_input.text()
@@ -191,8 +190,7 @@ class LoginWindow(QMainWindow):
             self._check_has_number,
             self._check_has_uppercase,
             self._check_has_special_char,
-            self._check_has_roman_numeral,
-            self._check_has_matrix_char
+            self._check_has_roman_numeral
         ]
     
     def _check_min_length(self, password):
@@ -220,11 +218,6 @@ class LoginWindow(QMainWindow):
         roman_numerals = {'I', 'V', 'X', 'L', 'C', 'D', 'M'}
         if not any(c in roman_numerals for c in password):
             return "Your password must include a Roman numeral."
-        return None
-    
-    def _check_has_matrix_char(self, password):
-        if not any(character in password.upper() for character in MATRIX):
-            return "Your password must contain a character from The Matrix."
         return None
     
     def handle_password_change(self):
@@ -261,6 +254,9 @@ class LoginWindow(QMainWindow):
         secret_window.exec()
     
     def handle_login(self):
+        if not hasattr(self, 'username_input') or not hasattr(self, 'password_input'):
+            return
+            
         username = self.username_input.text()
         password = self.password_input.text()
         
