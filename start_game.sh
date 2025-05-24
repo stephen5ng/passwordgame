@@ -3,5 +3,5 @@ cd /home/dietpi/security
 . env/bin/activate
 
 while true; do
-    ./security.py
+    ./desktop_qt.py
 done
