@@ -5,6 +5,11 @@ from PySide6.QtGui import QKeyEvent, QCloseEvent, QPixmap
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QLabel, QLineEdit, QPushButton, QDialog, QHBoxLayout)
 
+# Login credentials
+USERNAME = "jhulzo"
+PASSWORD = "password1234"
+SECRET_MESSAGE = "THE PEN TEST IS MIGHTIER THAN THE SWORD."
+
 MATRIX = [
     "APOC",
     "CHOI",
@@ -29,7 +34,7 @@ class SecretWindow(QDialog):
         
         layout = QVBoxLayout(self)
         
-        message = QLabel("MEET TONIGHT AT 8PM TO DISCUSS BETRAYAL OF DOCTOR PROFESSOR.")
+        message = QLabel(SECRET_MESSAGE)
         message.setAlignment(Qt.AlignCenter)
         message.setWordWrap(True)
         layout.addWidget(message)
@@ -289,7 +294,7 @@ class LoginWindow(QMainWindow):
         username = self.username_input.text()
         password = self.password_input.text()
         
-        if username == "jhulzo" and password == "password":
+        if username == USERNAME and password == PASSWORD:
             self.status_label.setText("Login successful!")
             self.status_label.setStyleSheet("color: green;")
             self._login_successful = True

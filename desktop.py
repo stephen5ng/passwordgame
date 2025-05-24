@@ -59,7 +59,7 @@ while running:
     if current_time - last_cursor_toggle > 0.5:  # Toggle cursor every 0.5 seconds
         cursor_visible = not cursor_visible
         last_cursor_toggle = current_time
-    print(f"password: {password}")
+    # print(f"password: {password}")
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -86,16 +86,16 @@ while running:
                 password_selected = False
             elif active_field:
                 if event.key == pygame.K_RETURN:
-                    if username == 'jhulzo' and password == 'password':
+                    if username == 'jhulzo' and password == 'password123':
                         running = False
                     else:
                         active_field = 'password'
                         password_selected = True
                     print(f"Username: {username}")
                     print(f"Password: {password}")
-                    if username == 'jhulzo' and password == 'password':
-                        username = ''
-                        password = ''
+                    # if username == 'jhulzo' and password == 'password':
+                    #     username = ''
+                    #     password = ''
                 elif event.key == pygame.K_BACKSPACE:
                     if active_field == 'username':
                         username = username[:-1]
