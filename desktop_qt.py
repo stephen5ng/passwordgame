@@ -7,9 +7,9 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
 
 # Login credentials
 USERNAME = "jhulzo"
-PASSWORD = "password1234"
-SECRET_MESSAGE = "THE PEN TEST IS MIGHTIER THAN THE SWORD."
-
+PASSWORD = "JHulz0!"
+SECRET_MESSAGE = "Protection builds a wall to keep you safe\nand fence you in."
+SECRET_MESSAGE_TITLE_BAR = "PROTECTION"
 MATRIX = [
     "APOC",
     "CHOI",
@@ -29,7 +29,7 @@ MATRIX = [
 class SecretWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("HULZO SECRETS")
+        self.setWindowTitle(SECRET_MESSAGE_TITLE_BAR)
         self.setFixedSize(400, 200)
         
         layout = QVBoxLayout(self)
@@ -174,7 +174,7 @@ class LoginWindow(QMainWindow):
         self.error_label = QLabel("")
         self.error_label.setStyleSheet("color: red;")
         self.error_label.setAlignment(Qt.AlignCenter)
-        self.error_label.setFixedWidth(400)
+        self.error_label.setFixedWidth(800)
         
         self.submit_button = QPushButton("Submit")
         self.submit_button.setFixedWidth(300)
