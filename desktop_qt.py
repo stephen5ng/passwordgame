@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QKeyEvent, QCloseEvent, QPixmap
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QLabel, QLineEdit, QPushButton, QDialog, QHBoxLayout)
+from password_validator import PasswordValidator
 
 # Login credentials
 USERNAME = "jhulzo"
@@ -56,6 +57,7 @@ class LoginWindow(QMainWindow):
         self.layout.setAlignment(Qt.AlignCenter)
         
         self._login_successful = False
+        self.password_validator = PasswordValidator()
         
         if skip_to == "1":
             self.show_password_screen()
@@ -190,77 +192,23 @@ class LoginWindow(QMainWindow):
     
     def validate_password(self):
         password = self.new_password_input.text()
-        if not password:
-            self.error_label.setText("")
+        is_valid, error = self.password_validator.validate_password(password)
+        
+        if not is_valid:
+            self.error_label.setText(error)
             self.submit_button.setEnabled(False)
-            return
-            
-        for constraint in self.password_constraints():
-            error = constraint(password)
-            if error:
-                self.error_label.setText(error)
-                self.submit_button.setEnabled(False)
-                return
-                
-        self.error_label.setText("")
-        self.submit_button.setEnabled(True)
-    
-    def password_constraints(self):
-        return [
-            self._check_min_length,
-            self._check_has_number,
-            self._check_has_uppercase,
-            self._check_has_special_char,
-            self._check_has_roman_numeral,
-            self._check_has_matrix_char,
-            self._check_has_lost_number
-        ]
-    
-    def _check_min_length(self, password):
-        if len(password) < 5:
-            return "Your password must be at least 5 characters."
-        return None
-    
-    def _check_has_number(self, password):
-        if not any(c.isdigit() for c in password):
-            return "Your password must include a number."
-        return None
-    
-    def _check_has_uppercase(self, password):
-        if not any(c.isupper() for c in password):
-            return "Your password must include an uppercase letter."
-        return None
-    
-    def _check_has_special_char(self, password):
-        special_chars = "!@#$%^&*()-_=+[]{}|;:,.<>?/"
-        if not any(c in special_chars for c in password):
-            return "Your password must contain a special character."
-        return None
-    
-    def _check_has_roman_numeral(self, password):
-        roman_numerals = {'I', 'V', 'X', 'L', 'C', 'D', 'M'}
-        if not any(c in roman_numerals for c in password):
-            return "Your password must include a Roman numeral."
-        return None
-    
-    def _check_has_matrix_char(self, password):
-        if not any(character in password.upper() for character in MATRIX):
-            return "Your password must contain a character from The Matrix."
-        return None
-    
-    def _check_has_lost_number(self, password):
-        lost_numbers = {'4', '8', '15', '16', '23', '42'}
-        if not any(str(num) in password for num in lost_numbers):
-            return "Your password must include a number from the TV show LOST."
-        return None
+        else:
+            self.error_label.setText("")
+            self.submit_button.setEnabled(True)
     
     def handle_password_change(self):
         new_password = self.new_password_input.text()
-        for constraint in self.password_constraints():
-            error = constraint(new_password)
-            if error:
-                self.error_label.setText(error)
-                return
+        is_valid, error = self.password_validator.validate_password(new_password)
+        
+        if not is_valid:
+            self.error_label.setText(error)
+            return
+            
         self.show_fake_desktop()
     
     def show_fake_desktop(self):
