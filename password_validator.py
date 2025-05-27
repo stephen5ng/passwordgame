@@ -91,7 +91,9 @@ class PasswordValidator:
     
     def check_has_lost_number(self, password):
         lost_numbers = {'4', '8', '15', '16', '23', '42'}
-        if not any(str(num) in password for num in lost_numbers):
+        # Split the password into complete numbers
+        potential_numbers = re.findall(r'\d+', password)
+        if not any(num in lost_numbers for num in potential_numbers):
             return "Your password must include a number from the TV show LOST."
         return None
 
