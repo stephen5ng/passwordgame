@@ -259,3 +259,5 @@ if __name__ == "__main__":
     skip_to = sys.argv[1] if len(sys.argv) > 1 else None
     window = LoginWindow(skip_to)
     window.show()
+    sys.exit(app.exec())
+    
