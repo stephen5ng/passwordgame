@@ -240,8 +240,13 @@ class LoginWindow(QMainWindow):
         if not hasattr(self, 'username_input') or not hasattr(self, 'password_input'):
             return
             
-        username = self.username_input.text()
-        password = self.password_input.text()
+        # Get values before any potential widget deletion
+        try:
+            username = self.username_input.text()
+            password = self.password_input.text()
+        except RuntimeError:
+            # Widget was already deleted
+            return
         
         if username == USERNAME and password == PASSWORD:
             self.status_label.setText("Login successful!")
@@ -249,10 +254,14 @@ class LoginWindow(QMainWindow):
             self._login_successful = True
             self.show_welcome_message()
         else:
-            self.status_label.setText("Invalid login")
-            self.status_label.setStyleSheet("color: red;")
-            self.password_input.clear()
-            self.password_input.setFocus()
+            try:
+                self.status_label.setText("Invalid login")
+                self.status_label.setStyleSheet("color: red;")
+                self.password_input.clear()
+                self.password_input.setFocus()
+            except RuntimeError:
+                # Widget was already deleted
+                return
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
