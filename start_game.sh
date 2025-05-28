@@ -3,5 +3,5 @@ cd /home/dietpi/security
 . env/bin/activate
 
 while true; do
-    ./desktop_qt.py
+    DISPLAY:=0 ./desktop_qt.py
 done

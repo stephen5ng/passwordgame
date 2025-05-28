@@ -146,6 +146,7 @@ class LoginWindow(QMainWindow):
         ok_button = QPushButton("OK")
         ok_button.setFixedWidth(300)
         ok_button.clicked.connect(self.show_password_screen)
+        ok_button.setDefault(True)
         button_layout.addWidget(ok_button)
         
         self.layout.addWidget(welcome_label)
@@ -166,7 +167,7 @@ class LoginWindow(QMainWindow):
         prompt_label = QLabel("Please choose a new password")
         prompt_label.setStyleSheet("font-size: 24px; font-weight: bold;")
         prompt_label.setAlignment(Qt.AlignCenter)
-        prompt_label.setFixedWidth(400)
+        prompt_label.setFixedWidth(800)
         
         self.new_password_input = QLineEdit()
         self.new_password_input.setPlaceholderText("Enter new password")
@@ -258,4 +259,3 @@ if __name__ == "__main__":
     skip_to = sys.argv[1] if len(sys.argv) > 1 else None
     window = LoginWindow(skip_to)
     window.show()
-    sys.exit(app.exec()) 
