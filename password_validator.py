@@ -2,7 +2,38 @@ import math
 import re
 
 class PasswordValidator:
-    # Matrix character list from original file
+    STAR_TREK = [
+        "PICARD",
+        "KIRK",
+        "SULU",
+        "JANEWAY",
+        "SPOCK",
+        "SISKO",
+        "PIKE"
+        ]
+
+    EYE_COLORS = [
+        "BROWN",
+        "BLUE",
+        "GREEN"
+        ]
+
+    BEATLES = [
+        "JOHN",
+        "PAUL",
+        "GEORGE",
+        "RINGO"
+        ]
+
+    BONDS = [
+        "DALTON",
+        "LAZENBY",
+        "CONNERY",
+        "MOORE",
+        "CRAIG",
+        "BROSNAN"
+        ]
+
     MATRIX = [
         "APOC",
         "CHOI",
@@ -36,12 +67,18 @@ class PasswordValidator:
             self.check_has_number,
             self.check_has_uppercase,
             self.check_has_special_char,
+            self.check_odd_vowels,
+            self.check_bond,
+            self.check_has_matrix_char,
             self.check_has_roman_numeral,
             self.check_has_matrix_char,
+            self.check_color,
             self.check_has_lost_number,
             self.check_romans_thirtyfive,
             self.check_severance_innie,
-            self.check_prime_length
+            self.check_beatle,
+            self.check_prime_length,
+            self.check_trek
         ]
 
     def validate_password(self, password):
@@ -89,6 +126,30 @@ class PasswordValidator:
             return "Your password must contain a character from The Matrix."
         return None
     
+    def check_trek(self, password):
+        if not any(character in password.upper() for character in self.STAR_TREK):
+            return ("Your password must contain your youngest sister's first boyfriend\n"
+                    "(her first real boyfriend, not that kid she fooled around with in high school)'s\n"
+                    "favorite Star Trek captain.")
+        return None
+    
+    def check_color(self, password):
+        if not any(color in password.upper() for color in self.EYE_COLORS):
+            return "Your password must contain the color of your mother's eyes."
+        return None
+
+    def check_beatle(self, password):
+        if not any(character in password.upper() for character in self.BEATLES):
+            return "Your password must contain the name of your college roommate's brother's favorite Beatle."
+        return None
+
+    def check_bond(self, password):
+        v = not any(bond in password.upper() for bond in self.BONDS)
+        print(f"bond check: {v}")
+        if not any(bond in password.upper() for bond in self.BONDS):
+            return "Your password must contain the last name of your favorite Bond actor."
+        return None
+
     def check_has_lost_number(self, password):
         lost_numbers = {'4', '8', '15', '16', '23', '42'}
         # Split the password into complete numbers
@@ -100,6 +161,7 @@ class PasswordValidator:
     def check_romans_thirtyfive(self, password):
         romans = self._extract_roman_numerals(password)
         numbers = [self._roman_to_int(r) for r in romans]
+        print(f"roman numerals: {numbers}")
         product = math.prod(numbers)
         if product != 35:
             return "The Roman numerals in your password should multiply to 35"
@@ -108,6 +170,12 @@ class PasswordValidator:
     def check_severance_innie(self, password):
         if not any(character in password.upper() for character in self.SEVERANCE):
             return "Your password must include the name of your favorite Severance Innie."
+        return None
+
+    def check_odd_vowels(self, password):
+        print("check odd vowels")
+        if not sum(1 for c in password.lower() if c in "aeiou") % 2 == 1:
+            return "Your password must include an odd number of vowels."
         return None
 
     def check_prime_length(self, password):
