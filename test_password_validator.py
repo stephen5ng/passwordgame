@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import pytest
 from password_validator import PasswordValidator
 
@@ -116,10 +118,10 @@ def test_validate_password(validator):
     assert error is not None
     
     # Test a valid password meeting all requirements
-    valid_password = "abcde5K$VNeo4VIIMarkjjj"
+    valid_password = "Brosnan3@HellyNeoVblue4VIIPaulKirkabb"
     is_valid, error = validator.validate_password(valid_password)
-    assert is_valid
     assert error == ""
+    assert is_valid
 
 def test_utility_methods(validator):
     # Test _is_prime
@@ -145,3 +147,6 @@ def test_utility_methods(validator):
     assert validator._extract_roman_numerals("abc") == []
     assert validator._extract_roman_numerals("abcIdef") == ["I"]
     assert validator._extract_roman_numerals("XXXV") == ["XXXV"]  # Single complete numeral 
+
+if __name__ == "__main__":
+    pytest.main([__file__]) 
