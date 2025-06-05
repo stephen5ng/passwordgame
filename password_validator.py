@@ -3,13 +3,15 @@ import re
 
 class PasswordValidator:
     STAR_TREK = [
-        "PICARD",
-        "KIRK",
-        "SULU",
-        "JANEWAY",
-        "SPOCK",
-        "SISKO",
-        "PIKE"
+        "Picard",
+        "Lorca",
+        "Archer",
+        "Kirk",
+        "Sulu",
+        "Janeway",
+        "Spock",
+        "Sisko",
+        "Pike"
         ]
 
     EYE_COLORS = [
@@ -19,46 +21,46 @@ class PasswordValidator:
         ]
 
     BEATLES = [
-        "JOHN",
-        "PAUL",
-        "GEORGE",
-        "RINGO"
+        "John",
+        "Paul",
+        "George",
+        "Ringo"
         ]
 
     BONDS = [
-        "DALTON",
-        "LAZENBY",
-        "CONNERY",
-        "MOORE",
-        "CRAIG",
-        "BROSNAN"
+        "Dalton",
+        "Lazenby",
+        "Connery",
+        "Moore",
+        "Craig",
+        "Brosnan"
         ]
 
     MATRIX = [
-        "APOC",
-        "CHOI",
-        "CYPHER",
-        "DOZER",
-        "DUFOUR",
-        "MORPHEUS",
-        "MOUSE",
-        "NEO",
-        "ORACLE",
-        "RHINEHEART",
-        "SMITH",
-        "SWITCH",
-        "TANK",
-        "TRINITY",
+        "Apoc",
+        "Choi",
+        "Cypher",
+        "Dozer",
+        "DuFour",
+        "Morpheus",
+        "Mouse",
+        "Neo",
+        "Oracle",
+        "Rhineheart",
+        "Smith",
+        "Switch",
+        "Tank",
+        "Trinity",
     ]
     
     SEVERANCE = [
-        "MARK",
-        "HELLY",
-        "IRVING",
-        "PETEY",
-        "DYLAN",
-        "HUANG",
-        "CASEY",
+        "Mark",
+        "Helly",
+        "Irving",
+        "Petey",
+        "Dylan",
+        "Huang",
+        "Casey",
         ]
 
     def __init__(self):
@@ -71,7 +73,6 @@ class PasswordValidator:
             self.check_bond,
             self.check_has_matrix_char,
             self.check_has_roman_numeral,
-            self.check_has_matrix_char,
             self.check_color,
             self.check_has_lost_number,
             self.check_romans_thirtyfive,
@@ -114,6 +115,22 @@ class PasswordValidator:
         if not any(c in special_chars for c in password):
             return "Your password must contain a special character."
         return None
+
+    def check_odd_vowels(self, password):
+        print("check odd vowels")
+        if not sum(1 for c in password.lower() if c in "aeiou") % 2 == 1:
+            return "Your password must include an odd number of vowels."
+        return None
+        
+    def check_bond(self, password):
+        if not any(bond in password for bond in self.BONDS):
+            return "Your password must contain the last name of your favorite Bond actor."
+        return None
+
+    def check_has_matrix_char(self, password):
+        if not any(character in password for character in self.MATRIX):
+            return "Your password must contain a character from The Matrix."
+        return None
     
     def check_has_roman_numeral(self, password):
         roman_numerals = {'I', 'V', 'X', 'L', 'C', 'D', 'M'}
@@ -121,33 +138,9 @@ class PasswordValidator:
             return "Your password must include a Roman numeral."
         return None
     
-    def check_has_matrix_char(self, password):
-        if not any(character in password.upper() for character in self.MATRIX):
-            return "Your password must contain a character from The Matrix."
-        return None
-    
-    def check_trek(self, password):
-        if not any(character in password.upper() for character in self.STAR_TREK):
-            return ("Your password must contain your youngest sister's first boyfriend\n"
-                    "(her first real boyfriend, not that kid she fooled around with in high school)'s\n"
-                    "favorite Star Trek captain.")
-        return None
-    
     def check_color(self, password):
         if not any(color in password.upper() for color in self.EYE_COLORS):
             return "Your password must contain the color of your mother's eyes."
-        return None
-
-    def check_beatle(self, password):
-        if not any(character in password.upper() for character in self.BEATLES):
-            return "Your password must contain the name of your college roommate's brother's favorite Beatle."
-        return None
-
-    def check_bond(self, password):
-        v = not any(bond in password.upper() for bond in self.BONDS)
-        print(f"bond check: {v}")
-        if not any(bond in password.upper() for bond in self.BONDS):
-            return "Your password must contain the last name of your favorite Bond actor."
         return None
 
     def check_has_lost_number(self, password):
@@ -168,14 +161,14 @@ class PasswordValidator:
         return None
 
     def check_severance_innie(self, password):
-        if not any(character in password.upper() for character in self.SEVERANCE):
+        if not any(character in password for character in self.SEVERANCE):
             return "Your password must include the name of your favorite Severance Innie."
         return None
 
-    def check_odd_vowels(self, password):
-        print("check odd vowels")
-        if not sum(1 for c in password.lower() if c in "aeiou") % 2 == 1:
-            return "Your password must include an odd number of vowels."
+
+    def check_beatle(self, password):
+        if not any(character in password for character in self.BEATLES):
+            return "Your password must contain the name of your college roommate's brother's favorite Beatle."
         return None
 
     def check_prime_length(self, password):
@@ -183,6 +176,13 @@ class PasswordValidator:
         if not self._is_prime(length):
             return "Your password length must be a prime number."
         return None
+
+    def check_trek(self, password):
+        if not any(character in password for character in self.STAR_TREK):
+            return ("Your password must contain your youngest sister's first boyfriend\n"
+                    "(her first real boyfriend, not that kid she fooled around with in high school)'s\n"
+                    "favorite Star Trek captain.")
+        return None    
 
     @staticmethod
     def _is_prime(n):
