@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change Password</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .warning-message {
+            background-color: #fce8e8;
+            color: #d93025;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            white-space: pre-line;
+            font-weight: bold;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        .error-message {
+            color: #d93025;
+            font-size: 1.125rem;
+            margin-top: 1rem;
+            line-height: 1.5;
+        }
+        .success-message {
+            color: #188038;
+            font-size: 1.125rem;
+            margin-top: 1rem;
+            line-height: 1.5;
+        }
+        .submit-button {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+        .submit-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .submit-button:not(:disabled) {
+            background-color: #1a73e8;
+            color: white;
+        }
+        .submit-button:not(:disabled):hover {
+            background-color: #1557b0;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="warning-message">IT HAS BEEN 30 DAYS SINCE YOU LAST CHANGED YOUR PASSWORD.
+YOU MUST CHANGE YOUR PASSWORD NOW FOR ACCESS.</div>
+        <h2>Change Password</h2>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input id="password" name="password" autocomplete="off">
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
+            <button id="submitButton" class="submit-button" disabled>SUBMIT</button>
+        </div>
+    </div>
+    <script src="password_validator.js"></script>
+</body>
+</html> 
